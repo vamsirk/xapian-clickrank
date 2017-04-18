@@ -1,5 +1,5 @@
 # xapian-clickrank
-Click rank project logging code
+Click rank project logging : See working of this :https://www.youtube.com/watch?v=cG6Y-aqDoWc
 
 call-script.cgi calls the letor for search and gets the results for the query fired.
 
