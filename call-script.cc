@@ -29,7 +29,9 @@ string uniqueid();
 template <typename Duration>
 string print_time(tm t, Duration fraction);
 
-char command[100];
+string unquote(string query);
+
+string command;
 
 static string logFileLocation = "/home/vamsidhar/logging/logs.txt" ;
 
@@ -49,8 +51,7 @@ int main(int argc, char *argv[])
 	  string url = "http://";
 	  url += hostName;
 	  url += "/cgi-bin/click-record.cgi";
-
-
+	  //string url = "http://";
 	  string cmdGeneration = "xapian-rank --db=";
           cmdGeneration += db;
 	  cmdGeneration += " ";
@@ -59,16 +60,19 @@ int main(int argc, char *argv[])
 
    	  form_iterator fi = formData.getElement("query");  
 	
-	  string query ="'";
+	  string query;
 
-	  if( !fi->isEmpty() && fi != (*formData).end()) {  
-      		query += **fi;
+	  if( !fi->isEmpty() && fi != (*formData).end()) {
+		query = "'";
+		string str = **fi;
+	        query +=unquote(str);
+		//query +=(**fi);
+      		query += "'";
    	  }
 
 	   else{
-		query += "Giraffes";
+	   	query += "'all'";
 	   }
-	   query += "'"; 
 	
 	
 	   cout << "Content-type:text/html\r\n\r\n";
@@ -77,8 +81,10 @@ int main(int argc, char *argv[])
 	   cout << "<title>Using GET and POST Methods</title>\n";
 	   cout << "</head>\n";
 	   cout << "<body>\n";
-           sprintf(command, "%s %s", cmdGeneration.c_str(), query.c_str());
-           string result = exec(command);
+           //sprintf(command, "%s %s", cmdGeneration.c_str(), query.c_str());
+	   command += cmdGeneration;
+	   command += query;
+           string result = exec(command.c_str());
 	   string id = uniqueid();
 
 
@@ -130,7 +136,20 @@ int main(int argc, char *argv[])
 	   cout << "</html>\n";
 }
 
+string unquote(string query){
+	string pre;
+	string post;
+	std::size_t found = query.find("'");
+	while(found!=std::string::npos){
+		pre = query.substr(0,found);
+		post = query.substr(found+1);
+		query = pre;
+		query +=post;
+		found = query.find("'");
+	}
+	return query;	
 
+}
 
 std::string exec(const char* cmd) {
     char buffer[128];
